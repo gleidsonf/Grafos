@@ -1,4 +1,4 @@
-N=16   Tipo=2  (coordenadas XY) 
+N=16  Tipo=2  (coordenadas XY) 
 38.24 20.42
 39.57 26.15
 40.56 25.32

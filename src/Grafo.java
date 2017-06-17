@@ -11,7 +11,7 @@ import com.opencsv.CSVWriter;
 public class Grafo {
 	double[][] D; // Matriz de Distancia
 	ArrayList<Integer> vnv; // Lista dos vertices nao visitados
-	int[] ciclo; // vetor de ciclo
+	int[] ciclo, cicloInicial; // vetor de ciclo
 	int tamanhoCiclo;
 	double custoCiclo;
 	int TAMANHO;
@@ -20,6 +20,7 @@ public class Grafo {
 	public Grafo(int n) {
 		vnv = new ArrayList<>();
 		ciclo = new int[n];
+		cicloInicial = new int[3];
 		D = new double[n][n];
 		TAMANHO = n;
 
@@ -248,8 +249,8 @@ public class Grafo {
 		atualizarCusto();
 
 	}
-
-	public void gerarCiclo() {
+	
+	public void gerarCicloInicial(){
 		Random random = new Random();
 
 		/**
@@ -259,11 +260,23 @@ public class Grafo {
 		for (int i = 0; i < 3; i++) {
 			numero = random.nextInt(vnv.size());
 			inserirCiclo(i, vnv.get(numero));
+			cicloInicial[i] = vnv.get(numero);
 			vnv.remove(numero);
-			printCiclo();
-
+			
 		}
 
+		
+	}
+
+	public void gerarCiclo() {
+		Random random = new Random();
+
+		/**
+		 * Gera ciclo incial com 3 vertices aleatorios.
+		 */
+		int numero;
+		gerarCicloInicial();
+		
 		/**
 		 * Gera o restante do ciclo
 		 */
@@ -290,13 +303,21 @@ public class Grafo {
 		}
 
 	}
+	
+	public void limparCiclo (){
+		ciclo = new int [TAMANHO];
+	} 
 
 	public static void main(String[] args) throws IOException {
 
 		Grafo grafo;
+		double res = 999999, max = 0, med = 0;
+		int [] init = new int [3];
+		int k = 200;
+		long tempo;
 
 		try {
-			String filename = "tsp10t3.txt"; // Chamar o arquivo.
+			String filename = "tsp73t3.txt"; // Chamar o arquivo.
 			BufferedReader read = new BufferedReader(new FileReader(filename));
 			int n, tipo;
 
@@ -323,8 +344,39 @@ public class Grafo {
 			default:
 				break;
 			}
+			
+			
+			tempo = System.currentTimeMillis();
+			for (int i = 0; i < k; i++) {
+				grafo.gerarCiclo();
+				
+				if (grafo.custoCiclo<res){
+					res = grafo.custoCiclo;
+					init = grafo.cicloInicial;
+				}
+				if (grafo.custoCiclo>max){
+					max = grafo.custoCiclo;
+				}
+				
+				med+=grafo.custoCiclo;
+				
+				grafo.limparCiclo();
+				grafo.vnv.clear();
+				for (int j = 1; j <= grafo.TAMANHO; j++) {
+					grafo.vnv.add(j);
+				}
+				grafo.custoCiclo = 0.0;
+				grafo.tamanhoCiclo = 0;
+			}
+			med/=k;
+			tempo = System.currentTimeMillis() - tempo;
 
-			grafo.gerarCiclo();
+			System.out.println("\n\nInicial: "+init[0]+'-'+init[1]+'-'+init[2]);
+			System.out.println("Maximo: "+max);
+			System.out.println("Media: "+med);
+			System.out.println("Resultado: "+res);
+			System.out.println("Tempo: "+tempo);
+			
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
